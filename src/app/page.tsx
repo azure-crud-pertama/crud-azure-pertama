@@ -2,8 +2,10 @@
 
 import { useState, FormEvent, ChangeEvent } from 'react';
 
+type Item = { id: string; text: string };
+
 export default function Home() {
-  const [items, setItems] = useState<string[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
   const [input, setInput] = useState('');
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -13,9 +15,14 @@ export default function Home() {
   const handleCreate = (e: FormEvent) => {
     e.preventDefault();
     const value = input.trim();
-    if (!value) return; // abaikan input kosong/whitespace
-    setItems(prev => [...prev, value]);
-    setInput(''); // kosongkan field setelah sukses
+    if (!value) return;
+    const newItem: Item = { id: crypto.randomUUID(), text: value };
+    setItems(prev => [...prev, newItem]);
+    setInput('');
+  };
+
+  const handleDelete = (id: string) => {
+    setItems(prev => prev.filter(item => item.id !== id));
   };
 
   return (
@@ -45,9 +52,17 @@ export default function Home() {
         </form>
 
         <ul className="text-left text-gray-700 space-y-1">
-          {items.map((item, i) => (
-            <li key={`${item}-${i}`} className="border-b pb-1">
-              {item}
+          {items.map(item => (
+            <li key={item.id} className="flex items-center justify-between border-b pb-1">
+              <span className="truncate">{item.text}</span>
+              <button
+                onClick={() => handleDelete(item.id)}
+                className="ml-2 px-2 py-1 text-sm rounded-md bg-red-600 text-white hover:bg-red-700 transition"
+                aria-label={`Hapus ${item.text}`}
+                title="Delete"
+              >
+                Delete
+              </button>
             </li>
           ))}
         </ul>
